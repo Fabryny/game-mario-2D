@@ -5,4 +5,5 @@ require 'src/Util'
 
 gTextures = {
     ['tiles'] = love.graphics.newImage('graphics/tiles.png'),
+    ['character'] = love.graphics.newImage('graphics/character.png'),
 }

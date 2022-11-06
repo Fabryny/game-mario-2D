@@ -7,6 +7,10 @@ VIRTUAL_WIDTH = 256
 VIRTUAL_HEIGHT = 144
 
 TILE_SIZE = 16
+
+CHARACTER_WIDTH = 16
+CHARACTER_HEIGHT = 20
+
 CAMERA_SCROLL_SPEED = 40
 
 -- tile ID
@@ -21,14 +25,20 @@ function love.load()
     tilesheet = gTextures['tiles']
     quads = GenerateQuads(tilesheet, TILE_SIZE, TILE_SIZE)
     
+    characterSheet = gTextures['character']
+    characterQuads = GenerateQuads(characterSheet, CHARACTER_WIDTH, CHARACTER_HEIGHT)
+
+    characterX = VIRTUAL_WIDTH / 2 - (CHARACTER_WIDTH / 2)
+    characterY = ((7 - 1) * TILE_SIZE) - CHARACTER_HEIGHT
+
     mapWidth = 20
     mapHeight = 20
 
     cameraScroll = 0
 
-    backgroundR = math.random(255) / 255 / 255
-    backgroundG = math.random(255) / 255 / 255
-    backgroundB = math.random(255) / 255 / 255
+    backgroundR = math.random(255) / 255 
+    backgroundG = math.random(255) / 255 
+    backgroundB = math.random(255) / 255 
 
     for y = 1, mapHeight do
         table.insert(tiles, {})
@@ -36,7 +46,7 @@ function love.load()
         for x = 1, mapWidth do
             -- sky and bricks; this ID directly maps to whatever quad we want to render
             table.insert(tiles[y], {
-                id = y < 5 and SKY or GROUND
+                id = y < 7 and SKY or GROUND
             })
         end
     end
@@ -84,5 +94,7 @@ function love.draw()
                 love.graphics.draw(tilesheet, quads[tile.id], (x - 1) * TILE_SIZE, (y - 1) * TILE_SIZE)
             end
         end
+        
+        love.graphics.draw(characterSheet, characterQuads[1], characterX, characterY)
     push:finish()
 end
