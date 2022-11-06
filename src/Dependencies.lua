@@ -2,6 +2,7 @@ Class = require 'lib/class'
 push = require 'lib/push'
 
 require 'src/Util'
+require 'src/Animation'
 
 gTextures = {
     ['tiles'] = love.graphics.newImage('graphics/tiles.png'),
