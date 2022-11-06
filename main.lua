@@ -14,6 +14,8 @@ CHARACTER_HEIGHT = 20
 CHARACTER_MOVE_SPEED = 40
 CAMERA_SCROLL_SPEED = 40
 
+JUMP_VELOCITY = -200
+GRAVITY = 7
 -- tile ID
 SKY = 2
 GROUND = 1
@@ -38,7 +40,13 @@ function love.load()
         frames = {10, 11},
         interval = 0.2
     }
+    jumpAnimation = Animation {
+        frames = {3},
+        interval = 1
+    }
 
+    
+    characterDY = 0
     currentAnimation = idleAnimation
 
 
@@ -85,19 +93,38 @@ function love.keypressed(key)
     if key == 'escape' then
         love.event.quit()
     end
+
+    if key == 'space' and characterDY == 0 then
+        characterDY = JUMP_VELOCITY
+        currentAnimation = jumpAnimation
+    end
 end
 
 function love.update(dt)
+
+    characterDY = characterDY + GRAVITY
+    characterY = characterY + characterDY * dt
+    
+    -- if we've gone below the map limit, set DY to 0
+    if characterY > ((7 - 1) * TILE_SIZE) - CHARACTER_HEIGHT then
+        characterY = ((7 - 1) * TILE_SIZE) - CHARACTER_HEIGHT
+        characterDY = 0
+    end  
 
     currentAnimation:update(dt)
 
     if love.keyboard.isDown('left') then
         characterX = characterX - CHARACTER_MOVE_SPEED * dt
-        currentAnimation = movingAnimation
+        if characterDY == 0 then
+            currentAnimation = movingAnimation
+        end
         direction = 'left'
+        
     elseif love.keyboard.isDown('right') then
         characterX = characterX + CHARACTER_MOVE_SPEED * dt
-        currentAnimation = movingAnimation
+        if characterDY == 0 then
+            currentAnimation = movingAnimation
+        end
         direction = 'right'
     else
         currentAnimation = idleAnimation
