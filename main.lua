@@ -8,6 +8,16 @@ VIRTUAL_HEIGHT = 144
 
 TILE_SIZE = 16
 
+-- number of tiles in each tile set
+TILE_SET_WIDTH = 5
+TILE_SET_HEIGHT = 4
+-- number of tile sets in sheet
+TILE_SETS_WIDE = 6
+TILE_SETS_TALL = 10
+-- number of topper sets in sheet
+TOPPER_SETS_WIDE = 6
+TOPPER_SETS_TALL = 18
+
 CHARACTER_WIDTH = 16
 CHARACTER_HEIGHT = 20
 
@@ -17,17 +27,27 @@ CAMERA_SCROLL_SPEED = 40
 JUMP_VELOCITY = -200
 GRAVITY = 7
 -- tile ID
-SKY = 2
-GROUND = 1
+SKY = 5
+GROUND = 3
 
 function love.load()
+    messageSpeed = 50
     math.randomseed(os.time())
-    
-    tiles = {}
     
     tilesheet = gTextures['tiles']
     quads = GenerateQuads(tilesheet, TILE_SIZE, TILE_SIZE)
     
+    topperSheet = gTextures['toppers']
+    topperQuads = GenerateQuads(topperSheet, TILE_SIZE, TILE_SIZE)
+
+    -- divide quad tables into tile sets
+    tilesets = GenerateTileSets(quads, TILE_SETS_WIDE, TILE_SETS_TALL, TILE_SET_WIDTH, TILE_SET_HEIGHT)
+    toppersets = GenerateTileSets(topperQuads, TOPPER_SETS_WIDE, TOPPER_SETS_TALL, TILE_SET_WIDTH, TILE_SET_HEIGHT)
+
+    -- random tile set and topper set for the level
+    tileset = math.random(#tilesets)
+    topperset = math.random(#toppersets)
+
     characterSheet = gTextures['character']
     characterQuads = GenerateQuads(characterSheet, CHARACTER_WIDTH, CHARACTER_HEIGHT)
 
@@ -64,7 +84,8 @@ function love.load()
     backgroundG = math.random(255) / 255 
     backgroundB = math.random(255) / 255 
 
-    for y = 1, mapHeight do
+    tiles = generateLevel()
+--[[     for y = 1, mapHeight do
         table.insert(tiles, {})
         
         for x = 1, mapWidth do
@@ -74,7 +95,7 @@ function love.load()
             })
         end
     end
-
+ ]]
     love.graphics.setDefaultFilter('nearest', 'nearest')
     love.window.setTitle('Mario')
 
@@ -98,6 +119,12 @@ function love.keypressed(key)
         characterDY = JUMP_VELOCITY
         currentAnimation = jumpAnimation
     end
+    
+    -- allow us to regenerate the level at will
+    if key == 'r' then
+        tileset = math.random(#tilesets)
+        topperset = math.random(#toppersets)
+    end
 end
 
 function love.update(dt)
@@ -114,6 +141,7 @@ function love.update(dt)
     currentAnimation:update(dt)
 
     if love.keyboard.isDown('left') then
+        messageSpeed = messageSpeed - CHARACTER_MOVE_SPEED * dt
         characterX = characterX - CHARACTER_MOVE_SPEED * dt
         if characterDY == 0 then
             currentAnimation = movingAnimation
@@ -121,7 +149,9 @@ function love.update(dt)
         direction = 'left'
         
     elseif love.keyboard.isDown('right') then
+        messageSpeed = messageSpeed + CHARACTER_MOVE_SPEED * dt
         characterX = characterX + CHARACTER_MOVE_SPEED * dt
+
         if characterDY == 0 then
             currentAnimation = movingAnimation
         end
@@ -142,11 +172,18 @@ function love.draw()
         -- as things are attempted to be drawn fractionally and then forced onto a small virtual canvas
         love.graphics.translate(-math.floor(cameraScroll), 0)
         love.graphics.clear(backgroundR, backgroundG, backgroundB, 1)
-        
+
         for y = 1, mapHeight do
             for x = 1, mapWidth do
                 local tile = tiles[y][x]
-                love.graphics.draw(tilesheet, quads[tile.id], (x - 1) * TILE_SIZE, (y - 1) * TILE_SIZE)
+                love.graphics.draw(tilesheet, tilesets[tileset][tile.id], 
+                    (x - 1) * TILE_SIZE, (y - 1) * TILE_SIZE)
+
+                -- draw a topper on top of the tile if it contains the flag for it
+                if tile.topper then
+                    love.graphics.draw(topperSheet, toppersets[topperset][tile.id], 
+                        (x - 1) * TILE_SIZE, (y - 1) * TILE_SIZE)
+                end
             end
         end
         
@@ -157,7 +194,7 @@ function love.draw()
         -- we also check for our direction and scale by -1 on the X axis if we're facing left
         -- when we scale by -1, we have to set the origin to the center of the sprite as well for proper flipping
         love.graphics.draw(characterSheet, characterQuads[currentAnimation:getCurrentFrame()], 
-
+        
             -- X and Y we draw at need to be shifted by half our width and height because we're setting the origin
             -- to that amount for proper scaling, which reverse-shifts rendering
             math.floor(characterX) + CHARACTER_WIDTH / 2, math.floor(characterY) + CHARACTER_HEIGHT / 2, 
@@ -167,5 +204,25 @@ function love.draw()
 
             -- lastly, the origin offsets relative to 0,0 on the sprite (set here to the sprite's center)
             CHARACTER_WIDTH / 2, CHARACTER_HEIGHT / 2)
+            love.graphics.printf('Press R to change THEME', messageSpeed, 10, VIRTUAL_WIDTH )
     push:finish()
+end
+
+function generateLevel()
+    local tiles = {}
+
+    for y = 1, mapHeight do
+        table.insert(tiles, {})
+        
+        for x = 1, mapWidth do
+            
+            -- sky and bricks; this ID directly maps to whatever quad we want to render
+            table.insert(tiles[y], {
+                id = y < 7 and SKY or GROUND,
+                topper = y == 7 and true or false
+            })
+        end
+    end
+
+    return tiles
 end
