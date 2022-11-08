@@ -1,9 +1,9 @@
+
 --[[
     Given an "atlas" (a texture with multiple sprites), as well as a
     width and a height for the tiles therein, split the texture into
     all of the quads by simply dividing it evenly.
 ]]
-
 function GenerateQuads(atlas, tilewidth, tileheight)
     local sheetWidth = atlas:getWidth() / tilewidth
     local sheetHeight = atlas:getHeight() / tileheight
@@ -22,7 +22,6 @@ function GenerateQuads(atlas, tilewidth, tileheight)
 
     return spritesheet
 end
-
 
 --[[
     Divides quads we've generated via slicing our tile sheet into separate tile sets.
