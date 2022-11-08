@@ -221,27 +221,34 @@ function generateLevel()
             })
         end
     end
+ -- iterate over X at the top level to generate the level in columns instead of rows
+ for x = 1, mapWidth do
+    if math.random(7) == 1 then
+        goto continue -- Make a chasms
+    end
 
-    for x = 1, mapWidth do
-        local spawnPillar = math.random(5) == 1
-        
-        if spawnPillar then
-            for pillar = 4, 6 do
-                tiles[pillar][x] = {
-                    id = GROUND,
-                    topper = pillar == 4 and true or false
-                }
-            end
-        end
-
-        -- always generate ground
-        for ground = 7, mapHeight do
-            tiles[ground][x] = {
+    -- random chance for a pillar
+    local spawnPillar = math.random(5) == 1
+    
+    if spawnPillar then
+        for pillar = 4, 6 do
+            tiles[pillar][x] = {
                 id = GROUND,
-                topper = (not spawnPillar and ground == 7) and true or false 
+                topper = pillar == 4 and true or false
             }
         end
     end
+
+    -- always generate ground
+    for ground = 7, mapHeight do
+        tiles[ground][x] = {
+            id = GROUND,
+            topper = (not spawnPillar and ground == 7) and true or false 
+        }
+    end
+
+    ::continue::
+end
 
     return tiles
 end
