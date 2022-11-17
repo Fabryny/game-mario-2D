@@ -1,10 +1,11 @@
 # Mario - 2D Game <br>
+Made using love2D.<br>
 ## Play the game <br>
  Download and play the game, check my website: Cooming soon!
 
 ## How run the project - Windows <br>
  You'll need to run:<br>
-   Love3d - https://love2d.org/<br>
+   Love2d - https://love2d.org/<br>
    Editor recommended:  Visual Studio Code<br><br>
 
 In VsCode install Love2d Support :<br>
